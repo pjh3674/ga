@@ -1,0 +1,71 @@
+# GA 멀티모델 라우터 설정 (Phase 9)
+# 역할별 권장 모델을 정의한다. run_debate의 auto_model_enabled=True 시 참조.
+# 우선순위: 각 항목의 첫 번째가 1순위, 뒤로 갈수록 폴백.
+
+roles:
+  # 법령 검토·추론 깊이가 필요한 역할
+  judge:
+    primary:   "openrouter/deepseek-r1"
+    fallback1: "openrouter/o3"
+    fallback2: "openrouter/claude-sonnet-4.5"
+    rationale: "구조화 판정·법령 추론 — DeepSeek R1의 CoT 능력 활용"
+
+  fact:
+    primary:   "openrouter/o4-mini"
+    fallback1: "openrouter/deepseek-r1"
+    fallback2: "openrouter/gemini-2.5-flash"
+    rationale: "법령·사실 검증 — 정밀 추론 모델 우선"
+
+  # 정책 논리·문체 품질이 중요한 역할
+  pro:
+    primary:   "openrouter/claude-sonnet-4.5"
+    fallback1: "openrouter/gpt-4.1"
+    fallback2: "openrouter/gemini-2.5-flash"
+    rationale: "공문서 논리·문체 — Claude 계열 강점"
+
+  con:
+    primary:   "openrouter/claude-sonnet-4.5"
+    fallback1: "openrouter/grok-3"
+    fallback2: "openrouter/gpt-4.1"
+    rationale: "비판적 반론·허점 공략 — Claude 또는 Grok"
+
+  # 현장 질의는 저비용·고속 모델로 충분
+  audience:
+    primary:   "openrouter/gemini-2.5-flash-lite"
+    fallback1: "openrouter/gpt-4.1-mini"
+    fallback2: "openrouter/claude-haiku-4.5"
+    rationale: "현장 질의 생성 — 저비용으로 충분"
+
+# ReportWriter 전용 모델 (보고서 작성 품질 우선)
+report_writer:
+  primary:   "openrouter/claude-sonnet-4.5"
+  fallback1: "openrouter/gpt-4.1"
+  fallback2: "openrouter/deepseek-chat-v3"
+  rationale: "공문서 문체·구조화 출력 — Claude 최우선"
+
+# Reviewer 전용 모델 (빠른 검수, 저비용)
+reviewer:
+  primary:   "openrouter/claude-haiku-4.5"
+  fallback1: "openrouter/gpt-4.1-mini"
+  fallback2: "openrouter/gemini-2.5-flash-lite"
+  rationale: "검수는 빠르고 저렴하게 — Haiku 최우선"
+
+# 품질 프로파일별 전략
+quality_profiles:
+  economy:
+    description: "무료 모델 우선, 비용 최소화"
+    override_all: true  # 위 설정 무시하고 무료 모델만 사용
+
+  balanced:
+    description: "역할별 최적 모델, 비용·품질 균형"
+    use_routing: true
+
+  quality:
+    description: "최고 품질 우선, 비용 무시"
+    judge:    "openrouter/o3"
+    fact:     "openrouter/o3"
+    pro:      "openrouter/claude-opus-4"
+    con:      "openrouter/claude-opus-4"
+    audience: "openrouter/claude-sonnet-4.5"
+    report_writer: "openrouter/claude-opus-4"
+    reviewer:      "openrouter/claude-sonnet-4.5"

@@ -1,0 +1,62 @@
+id: debate
+label: "🥊 찬반 토론"
+icon: "🥊"
+description: "두 가지 대립 관점에서 주제를 분석하고 논리적 결론을 도출합니다."
+
+theme:
+  primary: "#f59e0b"
+  secondary: "#3b82f6"
+  agent_colors:
+    pro: "#3b82f6"
+    con: "#ef4444"
+    judge: "#d29922"
+    fact: "#10b981"
+    audience: "#8b5cf6"
+
+roles:
+  pro:
+    label: "🟦 찬성"
+    desc: "사안을 지지하는 논리 구성"
+    tone: "논증적·근거 중심"
+  con:
+    label: "🟥 반대"
+    desc: "반론 및 리스크 분석"
+    tone: "비판적·허점 공략"
+  judge:
+    label: "⚖️ 심판"
+    desc: "중립적 종합 판정"
+    tone: "중립·구조화"
+  fact:
+    label: "🔍 팩트"
+    desc: "사실 관계 검증"
+    tone: "검증·정확성"
+  audience:
+    label: "👥 청중"
+    desc: "시민 시각 대표"
+    tone: "일상적·실질 관심"
+
+stage_messages:
+  pro: "🟦 찬성 측 논리 전개 중…"
+  con: "🟥 반대 측 반론 중…"
+  judge: "⚖️ 심판 합의 분석 중…"
+  fact: "🔍 팩트체커 검증 중…"
+  audience: "👥 청중 질문 생성 중…"
+
+search_boosters:
+  - ""
+
+termination_tag: "[합의됨]"
+min_rounds: 4
+
+report_schema:
+  - verdict
+  - pros
+  - cons
+  - facts
+  - questions
+  - improvements
+
+initiate_role: pro
+initiate_message: >
+  찬성 측으로서 이 주제를 지지하는 핵심 논거 3가지를 구체적이고 상세하게 제시하라.
+  위에 제공된 검색 자료와 근거를 적극 활용하라.

@@ -1,0 +1,104 @@
+{#
+  jangan_base.j2 — 장문기안형 표준 보고서 템플릿
+  해양수산부 행정전문가 보고서 양식 (5개 섹션 구조)
+
+  변수 목록:
+    title        : 보고서 제목
+    doc_date     : 작성일 (YYYY. M. D.)
+    author_dept  : 작성 부서 (예: 항만연안재생과)
+    ref_num      : 참조번호 (선택)
+    alignment_intro : 정책 명분 서두 (선택)
+    section1_bg  : 배경 내용 (마크다운 또는 개조식)
+    section2_cur : 현황 내용
+    section3_prb : 문제점 내용
+    section4_dir : 추진방향 내용
+    section5_pln : 향후계획 내용
+    critique_md  : 예상 쟁점 부속 검토서 (선택)
+    citations    : 참고 출처 목록 (list[str])
+    model_log    : 사용된 AI 모델 이력 (list[dict])
+    run_id       : 정제 실행 번호
+#}
+---
+title: "{{ title }}"
+date: "{{ doc_date }}"
+tags: [GA정제결과, {{ author_dept | default("항만연안재생과") }}]
+type: report
+run_id: {{ run_id | default(0) }}
+---
+
+# {{ title }}
+
+{% if ref_num %}
+> 문서번호: {{ ref_num }}
+{% endif %}
+> 작성일: {{ doc_date }} | 작성부서: {{ author_dept | default("항만연안재생과") }}
+
+---
+
+{% if alignment_intro %}
+> **📌 정책 명분**
+> {{ alignment_intro }}
+
+---
+{% endif %}
+
+## 1. 배경
+
+{{ section1_bg | default("(배경 내용 없음)") }}
+
+---
+
+## 2. 현황
+
+{{ section2_cur | default("(현황 내용 없음)") }}
+
+---
+
+## 3. 문제점
+
+{{ section3_prb | default("(문제점 내용 없음)") }}
+
+---
+
+## 4. 추진방향
+
+{{ section4_dir | default("(추진방향 내용 없음)") }}
+
+---
+
+## 5. 향후계획
+
+{{ section5_pln | default("(향후계획 내용 없음)") }}
+
+---
+
+{% if critique_md %}
+## 붙임 1. 예상 쟁점 및 대응 논리
+
+{{ critique_md }}
+
+---
+{% endif %}
+
+{% if citations %}
+## 참고 출처
+
+{% for c in citations %}
+{{ c }}
+{% endfor %}
+
+---
+{% endif %}
+
+{% if model_log %}
+<details>
+<summary>🤖 AI 모델 사용 이력</summary>
+
+| 단계 | 모델 |
+|------|------|
+{% for m in model_log %}
+| {{ m.step | default("?") }} | {{ m.model | default("?") }} |
+{% endfor %}
+
+</details>
+{% endif %}

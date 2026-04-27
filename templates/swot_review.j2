@@ -1,0 +1,78 @@
+{#
+  swot_review.j2 — SWOT 기반 정책 검토 보고서 템플릿
+
+  변수:
+    title, doc_date, author_dept, alignment_intro
+    strengths    : 강점 내용
+    weaknesses   : 약점 내용
+    opportunities: 기회 내용
+    threats      : 위협 내용
+    strategy_so  : SO 전략 (강점×기회)
+    strategy_st  : ST 전략 (강점×위협)
+    strategy_wo  : WO 전략 (약점×기회)
+    strategy_wt  : WT 전략 (약점×위협)
+    critique_md, citations, model_log, run_id
+#}
+---
+title: "{{ title }}"
+date: "{{ doc_date }}"
+tags: [GA정제결과, SWOT, {{ author_dept | default("항만연안재생과") }}]
+type: swot-report
+run_id: {{ run_id | default(0) }}
+---
+
+# {{ title }}
+
+> 작성일: {{ doc_date }} | 작성부서: {{ author_dept | default("항만연안재생과") }}
+
+---
+
+{% if alignment_intro %}
+> **📌 정책 명분**
+> {{ alignment_intro }}
+
+---
+{% endif %}
+
+## SWOT 분석
+
+| | **기회 (O)** | **위협 (T)** |
+|---|---|---|
+| **강점 (S)** | SO: {{ strategy_so | default("전략 미생성") }} | ST: {{ strategy_st | default("전략 미생성") }} |
+| **약점 (W)** | WO: {{ strategy_wo | default("전략 미생성") }} | WT: {{ strategy_wt | default("전략 미생성") }} |
+
+---
+
+### 💪 강점 (Strengths)
+
+{{ strengths | default("(강점 내용 없음)") }}
+
+### 😟 약점 (Weaknesses)
+
+{{ weaknesses | default("(약점 내용 없음)") }}
+
+### 🌱 기회 (Opportunities)
+
+{{ opportunities | default("(기회 내용 없음)") }}
+
+### ⚠️ 위협 (Threats)
+
+{{ threats | default("(위협 내용 없음)") }}
+
+---
+
+{% if critique_md %}
+## 붙임 1. 예상 쟁점 및 대응 논리
+
+{{ critique_md }}
+
+---
+{% endif %}
+
+{% if citations %}
+## 참고 출처
+
+{% for c in citations %}
+{{ c }}
+{% endfor %}
+{% endif %}

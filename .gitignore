@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+model_cache.json
+.archive_legacy/
+web/node_modules/
+web/.next/
+.env
+.vulture_env/
+apps/ga_backup_*.tar.gz
+../ga_backup_*.tar.gz
