@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Make the ga package importable when launched from anywhere.
@@ -54,7 +55,14 @@ from .streaming import (
     start_refinery_stream,
 )
 
-app = FastAPI(title="GA Debate Arena API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from db import init_db
+    init_db()
+    yield
+
+
+app = FastAPI(title="GA Debate Arena API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,13 +71,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    from db import init_db
-
-    init_db()
 
 
 @app.get("/api/health")

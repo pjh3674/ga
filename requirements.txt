@@ -1,4 +1,4 @@
-autogen-agentchat~=0.2.0
+autogen-agentchat~=0.2.0  # 0.4.x 마이그레이션 필요 (API 변경 큼 — 별도 작업)
 openai>=1.0.0
 streamlit>=1.32.0
 python-dotenv>=1.0.0
@@ -7,3 +7,4 @@ psutil>=5.9.0
 pdfplumber>=0.10.0
 watchdog>=3.0.0
 pyyaml
+redis>=5.0.0
