@@ -1,4 +1,56 @@
-from __future__ import annotations
+import sqlite3
+import datetime
+import json
+from pathlib import Path
+import logging
+import threading
+
+log = logging.getLogger(__name__)
+
+try:
+    import streamlit as st
+    _HAS_ST = True
+except ImportError:
+    _HAS_ST = False
+
+from config import DB_PATH
+
+# 스레드별 SQLite 연결 재사용 (다중 스레드 환경 안정성)
+_conn_local = threading.local()
+
+
+def _conn() -> sqlite3.Connection:
+    c = getattr(_conn_local, "conn", None)
+    if c is not None:
+        try:
+            c.execute("SELECT 1")
+            return c
+        except sqlite3.ProgrammingError:
+            pass  # closed, recreate
+
+    c = sqlite3.connect(str(DB_PATH), check_same_thread=False, timeout=30)
+    c.execute("PRAGMA journal_mode=WAL")
+    c.execute("PRAGMA foreign_keys = ON")
+    c.execute("PRAGMA synchronous = NORMAL")
+    c.row_factory = sqlite3.Row
+    _conn_local.conn = c
+    return c
+
+
+_db_initialized = False
+_db_init_lock = threading.Lock()
+
+
+def init_db() -> None:
+    """DB 초기화 (중복 호출 안전, 스레드 안전). Streamlit 환경에선 자동 캐시 활용."""
+    global _db_initialized
+    if _db_initialized:
+        return
+    with _db_init_lock:
+        if _db_initialized:
+            return
+        with _conn() as c:
+            c.executescript("""from __future__ import annotations
 
 import sqlite3
 import datetime
@@ -265,9 +317,10 @@ def fetch_recommendation_log(limit: int = 200) -> list[dict]:
     result = []
     for r in rows:
         d = dict(r)
-        try:
+                try:
             d["per_role_selected"] = json.loads(d.get("per_role_selected", "{}"))
-        except Exception:
+        except Exception as e:
+            log.warning("per_role_selected 파싱 실패: %s", e)
             d["per_role_selected"] = {}
         result.append(d)
     return result

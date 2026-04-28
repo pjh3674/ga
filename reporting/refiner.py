@@ -157,8 +157,8 @@ def _step1_parse(raw_text: str, topic: str, backend_key: str) -> dict:
     try:
         # JSON 파싱 시도
         parsed = json.loads(result)
-    except Exception:
-        # JSON 파싱 실패 시 최소 구조 반환
+        except Exception as e:
+        log.warning("Step 1 JSON 파싱 실패 (%s), 최소 구조 반환", e)
         parsed = {
             "main_claims": [], "numbers": [], "laws": [],
             "keywords": [topic], "risks": [],
@@ -208,14 +208,14 @@ def _step3_transmute(
     rag_context = ""
     if use_wisdom_rag and _RAG_AVAILABLE:
         try:
-            query = f"{topic} {' '.join(parsed.get('keywords', [])[:3])}"
+                        query = f"{topic} {' '.join(parsed.get('keywords', [])[:3])}"
             wisdom_results = wisdom_search(query, top_k=5)
             if wisdom_results:
-                rag_context = format_rag_results(wisdom_results, collection_name="행정지식베이스")
+                rag_context = format_rag_results(wisdom_results, collection_name="향정지식베이스")
                 citations_text = format_rag_citations(wisdom_results)
                 citations = [c.strip() for c in citations_text.split("\n") if c.strip().startswith("-")]
-        except Exception:
-            pass
+        except Exception as e:
+            log.warning("Step 3 wisdom_search 실패: %s", e)
 
     # 추출된 수치·법령 목록
     numbers_str = "\n".join(f"- {n}" for n in parsed.get("numbers", []))
@@ -421,8 +421,6 @@ def refine(
                     model_log=out.model_log,
                     run_id=run_id,
                 )
-            except Exception as _te:
-                log.warning(f"템플릿 재렌더링 실패: {_te}")
         else:
             _progress("✅ 정제 완료 (비판 검토 생략)")
 
@@ -433,14 +431,22 @@ def refine(
             except Exception:
                 pass
 
-    except Exception as e:
+
+
+
+
+
+
+
+
+        except Exception as e:
         out.error = str(e)
-        log.error(f"정제 파이프라인 오류: {e}")
+        log.error("정제 파이프라인 오류: %s", e)
         if run_id:
             try:
                 update_refinery_run_status(run_id, "failed")
-            except Exception:
-                pass
+            except Exception as _e:
+                log.warning("정제소 실패 상태 갱신 실패: %s", _e)
 
     return out
 
